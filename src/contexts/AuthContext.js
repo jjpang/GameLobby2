@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from "react"
 import { auth } from "../firebase"
+import { storage } from "../firebase";
 
 const AuthContext = React.createContext()
 
@@ -9,6 +10,7 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState()
+  const [imgUrl, setImgUrl] = useState()
   const [loading, setLoading] = useState(true)
 
   function signup(email, password) {
@@ -41,6 +43,9 @@ export function AuthProvider({ children }) {
       setLoading(false)
       if (user) {
         console.log('user logged in: ', user)
+        storage.ref('images/' + user.id + '/profile.jpg').getDownloadURL().then(url => {
+          setImgUrl(url)
+        })
       } else {
         console.log('user logged out')
       }
@@ -51,6 +56,7 @@ export function AuthProvider({ children }) {
 
   const value = {
     currentUser,
+    imgUrl,
     login,
     signup,
     logout,

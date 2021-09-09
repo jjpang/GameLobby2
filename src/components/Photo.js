@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { render } from "react-dom";
-
-import { storage } from "../firebase";
+import { storage, db } from "../firebase";
+import { useAuth } from '../contexts/AuthContext'
+import { doc, setDoc, getDoc } from "firebase/firestore/lite";
 
 const Photo = () => {
+  const { currentUser, imgUrl } = useAuth()
   const [image, setImage] = useState(null);
   const [url, setUrl] = useState("");
   const [progress, setProgress] = useState(0);
@@ -14,8 +16,9 @@ const Photo = () => {
     }
   };
 
-  const handleUpload = () => {
-    const uploadTask = storage.ref(`images/${image.name}`).put(image);
+  const handleUpload = async() => {
+    console.log(currentUser.uid)
+    const uploadTask = storage.ref(`images/${currentUser.uid}/profile.jpg`).put(image);
     uploadTask.on(
       "state_changed",
       snapshot => {
@@ -37,13 +40,26 @@ const Photo = () => {
           });
       }
     );
+    await setDoc(doc(db, "home", currentUser.uid), { url: url }, {merge: true})
   };
+  
+    //   console.log("image: ", image);
 
-  console.log("image: ", image);
+  const getUrl = async() => {
+    
+    const docSnap = await getDoc(doc(db, "home", currentUser.uid))
+    console.log(docSnap.data())
+    setUrl(docSnap.data())
+    console.log(url)
+  }
+
+  useEffect(() => {
+    getUrl()
+  },[]) // load user's profile photo
 
   return (
     <div>
-        <img src={url || "http://via.placeholder.com/300"} height="200" alt="firebase-image" />  
+        <img src={imgUrl || "http://via.placeholder.com/300"} height="200" alt="firebase-image" />  
         <br />
         <br />
         <progress value={progress} max="100" />

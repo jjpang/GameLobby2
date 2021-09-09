@@ -37,9 +37,9 @@ function App() {
       querySnapshot.forEach((doc) => {
         if (currentUser && doc.id===currentUser.uid) { 
           setColorsUsed(doc.data()) 
-          console.log(doc.id)
-          console.log(doc.data())
-          console.log(colorsUsed)
+          // console.log(doc.id)
+          // console.log(doc.data())
+          // console.log(colorsUsed)
         }
       })
     })
@@ -54,8 +54,8 @@ function App() {
   const saveData = async() => {
     if (currentUser) {
       await setDoc(doc(db, "home", currentUser.uid), colorsUsed);
-      console.log('saveData')
-      console.log(colorsUsed)
+      // console.log('saveData')
+      // console.log(colorsUsed)
     } else {
       await setDoc(doc(db, "home", "noLogin"), colorsUsed);
     }
