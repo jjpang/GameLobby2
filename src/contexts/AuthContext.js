@@ -39,12 +39,15 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
+      console.log('test')
       setCurrentUser(user)
       setLoading(false)
       if (user) {
         console.log('user logged in: ', user)
-        storage.ref('images/' + user.id + '/profile.jpg').getDownloadURL().then(url => {
+        storage.ref('images/' + user.uid + '/profile.jpg').getDownloadURL().then(url => {
           setImgUrl(url)
+        console.log('imgUrl')
+          console.log(url)
         })
       } else {
         console.log('user logged out')
@@ -57,6 +60,7 @@ export function AuthProvider({ children }) {
   const value = {
     currentUser,
     imgUrl,
+    setImgUrl,
     login,
     signup,
     logout,

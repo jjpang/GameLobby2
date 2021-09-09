@@ -15,7 +15,6 @@ import Grid from '@material-ui/core/Grid';
 import CreateBox from './components/CreateBox'
 import Box from '@material-ui/core/Box';
 import NavBar from './components/NavBar'
-import { AuthProvider } from './contexts/AuthContext'
 import { useAuth } from './contexts/AuthContext'
 import Photo from './components/Photo'
 
@@ -24,7 +23,7 @@ function App() {
   const colors = ['','Red','Yellow','Green','Blue','Orange','Purple','Pink']
   const [colorsUsed, setColorsUsed] = useState({color1: '',color2: '',color3: '',color4: ''})
   const [colorsLeft, setColorsLeft] = useState(colors)
-  const [loading, setLoading] = useState(false)
+  const [dataFetched, setDataFetched] = useState(false)
   
   let colorsUsedNow = colorsUsed
   let colorsLeftNow = colorsLeft
@@ -32,27 +31,28 @@ function App() {
   const ref = firebase.firestore().collection("home")
   
   const fetchData=()=>{
-    setLoading(true)
+    if (!currentUser) return
     ref.onSnapshot((querySnapshot)=>{
       querySnapshot.forEach((doc) => {
-        if (currentUser && doc.id===currentUser.uid) { 
+        if (doc.id===currentUser.uid) { 
           setColorsUsed(doc.data()) 
           // console.log(doc.id)
+          // console.log('fetchData')
           // console.log(doc.data())
           // console.log(colorsUsed)
+          colorsUsedNow = Object.values(colorsUsed)
+          colorsLeftNow = colors.filter((color)=>{
+            return !colorsUsedNow.includes(color)
+          })
+          setColorsLeft(colorsLeftNow)
+          setDataFetched(true)
         }
       })
     })
-    colorsUsedNow = Object.values(colorsUsed)
-    colorsLeftNow = colors.filter((color)=>{
-      return !colorsUsedNow.includes(color)
-    })
-    setColorsLeft(colorsLeftNow)
-    setLoading(false)
   }
   
   const saveData = async() => {
-    if (currentUser) {
+    if (currentUser && dataFetched) {
       await setDoc(doc(db, "home", currentUser.uid), colorsUsed);
       // console.log('saveData')
       // console.log(colorsUsed)
@@ -67,10 +67,9 @@ function App() {
   
   useEffect(() => {
     saveData()
-  },[colorsUsed, colorsLeft, saveData])// updates colorsUsed in firestore. only called upon mount, read about lifecycle hooks.
+  },[colorsUsed, colorsLeft, saveData])// updates colorsUsed in firestore. only called upon mount when the DOM is dropped and the function is being recreated, read about lifecycle hooks.
   
   return (
-    <AuthProvider>
       <main>
       <NavBar />  
       <p className="title">Game Lobby</p>
@@ -78,7 +77,6 @@ function App() {
       <Box display="flex" justifyContent="center">
         <Photo />
       </Box>
-      {loading && <Box fontSize={24} textAlign="center" mb={6}>Loading...</Box> }
         {currentUser && <Box fontSize={24} textAlign="center" mb={6}>Current User: {currentUser.email}</Box> }
         <Grid container spacing={5} justifyContent="center">
           <CreateBox title = 'P1' colorNum = 'color1' colorsUsed={colorsUsed} setColorsUsed={setColorsUsed} colorsUsedNow={colorsUsedNow} colorsLeft={colorsLeft} setColorsLeft={setColorsLeft} colorsLeftNow={colorsLeftNow} />
@@ -88,7 +86,6 @@ function App() {
         </Grid>
       </Container>
       </main>
-    </AuthProvider>
   );
 }
 

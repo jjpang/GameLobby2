@@ -5,9 +5,9 @@ import { useAuth } from '../contexts/AuthContext'
 import { doc, setDoc, getDoc } from "firebase/firestore/lite";
 
 const Photo = () => {
-  const { currentUser, imgUrl } = useAuth()
+  const { currentUser, imgUrl, setImgUrl } = useAuth()
   const [image, setImage] = useState(null);
-  const [url, setUrl] = useState("");
+//   const [url, setUrl] = useState("");
   const [progress, setProgress] = useState(0);
 
   const handleChange = e => {
@@ -17,6 +17,7 @@ const Photo = () => {
   };
 
   const handleUpload = async() => {
+    console.log('uid')
     console.log(currentUser.uid)
     const uploadTask = storage.ref(`images/${currentUser.uid}/profile.jpg`).put(image);
     uploadTask.on(
@@ -32,25 +33,22 @@ const Photo = () => {
       },
       () => {
         storage
-          .ref("images")
-          .child(image.name)
+          .ref(`images/${currentUser.uid}/profile.jpg`)
           .getDownloadURL()
           .then(url => {
-            setUrl(url);
+            setImgUrl(url);
           });
       }
     );
-    await setDoc(doc(db, "home", currentUser.uid), { url: url }, {merge: true})
   };
   
     //   console.log("image: ", image);
 
   const getUrl = async() => {
-    
+    if (!currentUser) return
     const docSnap = await getDoc(doc(db, "home", currentUser.uid))
-    console.log(docSnap.data())
-    setUrl(docSnap.data())
-    console.log(url)
+    // console.log(docSnap.data())
+    setImgUrl(docSnap.data())
   }
 
   useEffect(() => {
