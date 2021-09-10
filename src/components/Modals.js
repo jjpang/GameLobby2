@@ -5,12 +5,13 @@ import Button from '@material-ui/core/Button';
 
 import Avatar from '@material-ui/core/Avatar';
 import TextField from '@material-ui/core/TextField';
-import Link from '@material-ui/core/Link';
+import Link2 from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import Alert from '@material-ui/lab/Alert';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { useAuth } from '../contexts/AuthContext'
+import { BrowserRouter as Link, useHistory } from "react-router-dom";
 
 function getModalStyle() {
   const top = 50;
@@ -34,7 +35,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Modals() {
+export default function Modals({loadData}) {
+  const history = useHistory();
   const [error, setError] = useState("")
   const signUpEmailRef = useRef()
   const signUpPasswordRef = useRef()
@@ -54,6 +56,7 @@ export default function Modals() {
   const handleLogin = async(e) => {
     e.preventDefault()
     handleCloseLogin()
+    loadData()
     try {
       await login(loginEmailRef.current.value, loginPasswordRef.current.value)
     } catch {
@@ -62,6 +65,7 @@ export default function Modals() {
   }
   const handleLogout = async(e) => {
     e.preventDefault()
+    history.push("/")
     try {
       await logout()
     } catch {
@@ -197,12 +201,12 @@ export default function Modals() {
             </Link>*/}
           </Grid>
           <Grid item>
-            <Link href="#" variant="body2" onClick={()=>{
+            <Link2 href="#" variant="body2" onClick={()=>{
               handleCloseLogin()
               handleOpenSignUp()
             }}>
               {"Don't have an account? Sign Up"}
-            </Link>
+            </Link2>
           </Grid>
         </Grid>
       </form>
@@ -211,21 +215,21 @@ export default function Modals() {
 
   return (
     <div>
-      {!currentUser && <Button id="sign-up-button" className="logged-out" display = "none" color="inherit" onClick={handleOpenSignUp}>Sign Up</Button>}
+      {!currentUser && <Button id="sign-up-button" display = "none" color="inherit" onClick={handleOpenSignUp}>Sign Up</Button>}
       <Modal
         open={openSignUp}
         onClose={handleCloseSignUp}
       >
         {signUpText}
       </Modal>
-      {!currentUser && <Button className="logged-out" display = "none" color="inherit" onClick={handleOpenLogin}>Login</Button>}
+      {!currentUser && <Button display = "none" color="inherit" onClick={handleOpenLogin}>Login</Button>}
       <Modal
         open={openLogin}
         onClose={handleCloseLogin}
       >
         {loginText}
       </Modal>
-      {currentUser && <Button id="logout-button" className="logged-in" display = "none" color="inherit" onClick={handleLogout}>Logout</Button>}
+      {currentUser && <Button id="logout-button" display = "none" color="inherit" onClick={handleLogout}>Logout</Button>}
     </div>
   );
 }

@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { render } from "react-dom";
-import { storage, db } from "../firebase";
+import React, { useState } from "react";
+import { storage } from "../firebase";
 import { useAuth } from '../contexts/AuthContext'
-import { doc, setDoc, getDoc } from "firebase/firestore/lite";
 
 const Photo = () => {
   const { currentUser, imgUrl, setImgUrl } = useAuth()
@@ -17,8 +15,6 @@ const Photo = () => {
   };
 
   const handleUpload = async() => {
-    console.log('uid')
-    console.log(currentUser.uid)
     const uploadTask = storage.ref(`images/${currentUser.uid}/profile.jpg`).put(image);
     uploadTask.on(
       "state_changed",
@@ -41,29 +37,20 @@ const Photo = () => {
       }
     );
   };
-  
-    //   console.log("image: ", image);
-
-  const getUrl = async() => {
-    if (!currentUser) return
-    const docSnap = await getDoc(doc(db, "home", currentUser.uid))
-    // console.log(docSnap.data())
-    setImgUrl(docSnap.data())
-  }
-
-  useEffect(() => {
-    getUrl()
-  },[]) // load user's profile photo
 
   return (
     <div>
-        <img src={imgUrl || "http://via.placeholder.com/300"} height="200" alt="firebase-image" />  
+      <p className="title">Profile</p>
+      <br />
+      <img src={imgUrl || "http://via.placeholder.com/300"} height="200" alt="firebase" />  
         <br />
         <br />
         <progress value={progress} max="100" />
         <br />
         <br />
         <input type="file" onChange={handleChange} />
+        <br />
+        <br />
         <button onClick={handleUpload}>Upload</button>
         <br />
         <br />

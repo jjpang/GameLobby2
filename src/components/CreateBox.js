@@ -2,7 +2,7 @@ import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 
-const CreateBox = ({title, colorNum, colorsUsed, setColorsUsed, colorsUsedNow, colorsLeft, setColorsLeft, colorsLeftNow}) => {        
+const CreateBox = ({title, colorNum, colorsUsed, setColorsUsed, colorsUsedNow, colorsLeft, setColorsLeft, colorsLeftNow, dataSaved, setDataSaved}) => {        
     
     return (
       <Grid item xs={5}>
@@ -24,6 +24,7 @@ const CreateBox = ({title, colorNum, colorsUsed, setColorsUsed, colorsUsedNow, c
                 
                 setColorsUsed(colorsUsedNow)
                 setColorsLeft(colorsLeftNow)
+                setDataSaved(false)
               }}
                 value={colorsUsedNow[colorNum]}
                 >

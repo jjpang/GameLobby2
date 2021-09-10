@@ -7,6 +7,8 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import Modals from './Modals'
 import Button from '@material-ui/core/Button';
+import { BrowserRouter as Router, Link } from "react-router-dom";
+import { useAuth } from '../contexts/AuthContext'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -20,8 +22,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function NavBar() {
+export default function NavBar({loadData}) {
   const classes = useStyles();
+  const { currentUser } = useAuth()
 
   return (
     <div className={classes.root}>
@@ -29,10 +32,12 @@ export default function NavBar() {
         <Toolbar>
           <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
             <MenuIcon />
+            <Button component={Link} to="/" id="home" display = "none" color="inherit">Home</Button>
           </IconButton>
           <Typography variant="h6" className={classes.title}>
           </Typography>
-          <Modals />
+          {currentUser && <Button id="profile" display = "none" color="inherit" component={Link} to="/profile" >Profile</Button>}
+          <Modals loadData={loadData} />
         </Toolbar>
       </AppBar>
     </div>

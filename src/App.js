@@ -1,9 +1,5 @@
 /*
-- Colors disappear when logged in user refreshes page
-- When adding fetchData into useEffect, there's an infinite loop
-// Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
-- useRefs - when to use? It's in modals.js but I don't know why.
-- in Modals.js, how do you kniow where functions belong? Outside of export default, 
+Warning: unstable_flushDiscreteUpdates: Cannot flush updates when React is already rendering.
 */
 
 import React, { useState, useEffect } from 'react';
@@ -17,76 +13,99 @@ import Box from '@material-ui/core/Box';
 import NavBar from './components/NavBar'
 import { useAuth } from './contexts/AuthContext'
 import Photo from './components/Photo'
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 function App() {
+  return (
+    <Router>
+      <NavBar />  
+      <Switch>
+        <Route path="/profile">
+          <Profile />
+        </Route>
+        <Route path="/">
+          <Home />
+        </Route>
+      </Switch>  
+    </Router>
+  );
+}
+
+export default App;
+
+function Profile() {
+  return (
+    <Box display="flex" justifyContent="center">
+      <Photo />
+    </Box>
+  )
+}
+
+function Home() {
   const { currentUser } = useAuth()
   const colors = ['','Red','Yellow','Green','Blue','Orange','Purple','Pink']
   const [colorsUsed, setColorsUsed] = useState({color1: '',color2: '',color3: '',color4: ''})
   const [colorsLeft, setColorsLeft] = useState(colors)
   const [dataFetched, setDataFetched] = useState(false)
+  const [dataSaved, setDataSaved] = useState(false)
   
   let colorsUsedNow = colorsUsed
   let colorsLeftNow = colorsLeft
   
   const ref = firebase.firestore().collection("home")
   
-  const fetchData=()=>{
-    if (!currentUser) return
-    ref.onSnapshot((querySnapshot)=>{
-      querySnapshot.forEach((doc) => {
-        if (doc.id===currentUser.uid) { 
-          setColorsUsed(doc.data()) 
-          // console.log(doc.id)
-          // console.log('fetchData')
-          // console.log(doc.data())
-          // console.log(colorsUsed)
-          colorsUsedNow = Object.values(colorsUsed)
-          colorsLeftNow = colors.filter((color)=>{
-            return !colorsUsedNow.includes(color)
-          })
-          setColorsLeft(colorsLeftNow)
-          setDataFetched(true)
-        }
+  const loadData = async()=>{
+    if (!dataFetched && currentUser) { // fetchData on signup or login
+      console.log('fetch')
+      ref.onSnapshot((querySnapshot)=>{ 
+        querySnapshot.forEach((doc) => {
+          if (doc.id===currentUser.uid) { // on login
+            setColorsUsed(doc.data()) 
+            colorsUsedNow = Object.values(colorsUsed)
+            colorsLeftNow = colors.filter((color)=>{
+              return !colorsUsedNow.includes(color)
+            })
+            setColorsLeft(colorsLeftNow)
+            setDataFetched(true)
+          }
+        })
       })
-    })
-  }
-  
-  const saveData = async() => {
-    if (currentUser && dataFetched) {
-      await setDoc(doc(db, "home", currentUser.uid), colorsUsed);
-      // console.log('saveData')
-      // console.log(colorsUsed)
+      if (!dataFetched) { // on signup aka no id match in firestore because it's a first-time user
+        await setDoc(doc(db, "home", currentUser.uid), colorsUsed)
+        setDataSaved(true)
+        setDataFetched(true)
+      } 
     } else {
-      await setDoc(doc(db, "home", "noLogin"), colorsUsed);
+      console.log('save')
+      if (!dataSaved) {
+        if (currentUser) {
+          await setDoc(doc(db, "home", currentUser.uid), colorsUsed)
+          setDataSaved(true);
+        } else {
+          await setDoc(doc(db, "home", "noLogin"), colorsUsed)
+          setDataSaved(true);
+        }
+      }
     }
   }
   
   useEffect(() => {
-    fetchData()
-  },[currentUser]) // loads player's colors whenever user logins aka currentUser changes
-  
-  useEffect(() => {
-    saveData()
-  },[colorsUsed, colorsLeft, saveData])// updates colorsUsed in firestore. only called upon mount when the DOM is dropped and the function is being recreated, read about lifecycle hooks.
-  
+    loadData() 
+  },[colorsUsed, loadData]) // loads and updates firestore 
+  // updates colorsUsed in firestore. only called upon mount when the DOM is dropped and the function is being recreated, read about lifecycle hooks.
+
   return (
-      <main>
-      <NavBar />  
+    <main>
       <p className="title">Game Lobby</p>
       <Container maxWidth="md" id="grid">
-      <Box display="flex" justifyContent="center">
-        <Photo />
-      </Box>
         {currentUser && <Box fontSize={24} textAlign="center" mb={6}>Current User: {currentUser.email}</Box> }
         <Grid container spacing={5} justifyContent="center">
-          <CreateBox title = 'P1' colorNum = 'color1' colorsUsed={colorsUsed} setColorsUsed={setColorsUsed} colorsUsedNow={colorsUsedNow} colorsLeft={colorsLeft} setColorsLeft={setColorsLeft} colorsLeftNow={colorsLeftNow} />
-          <CreateBox title = 'P2' colorNum = 'color2' colorsUsed={colorsUsed} setColorsUsed={setColorsUsed} colorsUsedNow={colorsUsedNow} colorsLeft={colorsLeft} setColorsLeft={setColorsLeft} colorsLeftNow={colorsLeftNow} />
-          <CreateBox title = 'P3' colorNum = 'color3' colorsUsed={colorsUsed} setColorsUsed={setColorsUsed} colorsUsedNow={colorsUsedNow} colorsLeft={colorsLeft} setColorsLeft={setColorsLeft} colorsLeftNow={colorsLeftNow} />
-          <CreateBox title = 'P4' colorNum = 'color4' colorsUsed={colorsUsed} setColorsUsed={setColorsUsed} colorsUsedNow={colorsUsedNow} colorsLeft={colorsLeft} setColorsLeft={setColorsLeft} colorsLeftNow={colorsLeftNow} />
+          <CreateBox title = 'P1' colorNum = 'color1' colorsUsed={colorsUsed} setColorsUsed={setColorsUsed} colorsUsedNow={colorsUsedNow} colorsLeft={colorsLeft} setColorsLeft={setColorsLeft} colorsLeftNow={colorsLeftNow} dataSaved={dataSaved} setDataSaved={setDataSaved} loadData={loadData} />
+          <CreateBox title = 'P2' colorNum = 'color2' colorsUsed={colorsUsed} setColorsUsed={setColorsUsed} colorsUsedNow={colorsUsedNow} colorsLeft={colorsLeft} setColorsLeft={setColorsLeft} colorsLeftNow={colorsLeftNow} dataSaved={dataSaved} setDataSaved={setDataSaved} loadData={loadData} />
+          <CreateBox title = 'P3' colorNum = 'color3' colorsUsed={colorsUsed} setColorsUsed={setColorsUsed} colorsUsedNow={colorsUsedNow} colorsLeft={colorsLeft} setColorsLeft={setColorsLeft} colorsLeftNow={colorsLeftNow} dataSaved={dataSaved} setDataSaved={setDataSaved} loadData={loadData} />
+          <CreateBox title = 'P4' colorNum = 'color4' colorsUsed={colorsUsed} setColorsUsed={setColorsUsed} colorsUsedNow={colorsUsedNow} colorsLeft={colorsLeft} setColorsLeft={setColorsLeft} colorsLeftNow={colorsLeftNow} dataSaved={dataSaved} setDataSaved={setDataSaved} loadData={loadData} />
         </Grid>
       </Container>
-      </main>
-  );
+    </main>
+  )
 }
-
-export default App;
