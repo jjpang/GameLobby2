@@ -15,33 +15,9 @@ import { useAuth } from './contexts/AuthContext'
 import Photo from './components/Photo'
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
+// Try to store states in the highest level component to store data on the user with Firebase. You can only pass downstream, not upstream.
+
 function App() {
-  return (
-    <Router>
-      <NavBar />  
-      <Switch>
-        <Route path="/profile">
-          <Profile />
-        </Route>
-        <Route path="/">
-          <Home />
-        </Route>
-      </Switch>  
-    </Router>
-  );
-}
-
-export default App;
-
-function Profile() {
-  return (
-    <Box display="flex" justifyContent="center">
-      <Photo />
-    </Box>
-  )
-}
-
-function Home() {
   const { currentUser } = useAuth()
   const colors = ['','Red','Yellow','Green','Blue','Orange','Purple','Pink']
   const [colorsUsed, setColorsUsed] = useState({color1: '',color2: '',color3: '',color4: ''})
@@ -77,7 +53,8 @@ function Home() {
       } 
     } else {
       console.log('save')
-      if (!dataSaved) {
+      console.table({dataFetched, colorsUsed, currentUser})
+      if (!dataSaved) { // on changes when logged in
         if (currentUser) {
           await setDoc(doc(db, "home", currentUser.uid), colorsUsed)
           setDataSaved(true);
@@ -93,17 +70,43 @@ function Home() {
     loadData() 
   },[colorsUsed, loadData]) // loads and updates firestore 
   // updates colorsUsed in firestore. only called upon mount when the DOM is dropped and the function is being recreated, read about lifecycle hooks.
+  
+  return (
+    <Router>
+      <NavBar loadData={loadData} />  
+      <Switch>
+        <Route path="/profile">
+          <Profile />
+        </Route>
+        <Route path="/">
+          <Home currentUser={currentUser} loadData={loadData} colorsUsed={colorsUsed} setColorsUsed={setColorsUsed} colorsUsedNow={colorsUsedNow} colorsLeft={colorsLeft} setColorsLeft={setColorsLeft} colorsLeftNow={colorsLeftNow} dataSaved={dataSaved} setDataSaved={setDataSaved} />
+        </Route>
+      </Switch>  
+    </Router>
+  );
+}
 
+export default App;
+
+function Profile() {
+  return (
+    <Box display="flex" justifyContent="center">
+      <Photo />
+    </Box>
+  )
+}
+
+function Home({ currentUser, loadData, colorsUsed, setColorsUsed, colorsUsedNow, colorsLeft, setColorsLeft, colorsLeftNow, dataSaved, setDataSaved }) {
   return (
     <main>
       <p className="title">Game Lobby</p>
       <Container maxWidth="md" id="grid">
         {currentUser && <Box fontSize={24} textAlign="center" mb={6}>Current User: {currentUser.email}</Box> }
         <Grid container spacing={5} justifyContent="center">
-          <CreateBox title = 'P1' colorNum = 'color1' colorsUsed={colorsUsed} setColorsUsed={setColorsUsed} colorsUsedNow={colorsUsedNow} colorsLeft={colorsLeft} setColorsLeft={setColorsLeft} colorsLeftNow={colorsLeftNow} dataSaved={dataSaved} setDataSaved={setDataSaved} loadData={loadData} />
-          <CreateBox title = 'P2' colorNum = 'color2' colorsUsed={colorsUsed} setColorsUsed={setColorsUsed} colorsUsedNow={colorsUsedNow} colorsLeft={colorsLeft} setColorsLeft={setColorsLeft} colorsLeftNow={colorsLeftNow} dataSaved={dataSaved} setDataSaved={setDataSaved} loadData={loadData} />
-          <CreateBox title = 'P3' colorNum = 'color3' colorsUsed={colorsUsed} setColorsUsed={setColorsUsed} colorsUsedNow={colorsUsedNow} colorsLeft={colorsLeft} setColorsLeft={setColorsLeft} colorsLeftNow={colorsLeftNow} dataSaved={dataSaved} setDataSaved={setDataSaved} loadData={loadData} />
-          <CreateBox title = 'P4' colorNum = 'color4' colorsUsed={colorsUsed} setColorsUsed={setColorsUsed} colorsUsedNow={colorsUsedNow} colorsLeft={colorsLeft} setColorsLeft={setColorsLeft} colorsLeftNow={colorsLeftNow} dataSaved={dataSaved} setDataSaved={setDataSaved} loadData={loadData} />
+          <CreateBox title = 'P1' colorNum = 'color1' colorsUsed={colorsUsed} setColorsUsed={setColorsUsed} colorsUsedNow={colorsUsedNow} colorsLeft={colorsLeft} setColorsLeft={setColorsLeft} colorsLeftNow={colorsLeftNow} dataSaved={dataSaved} setDataSaved={setDataSaved} />
+          <CreateBox title = 'P2' colorNum = 'color2' colorsUsed={colorsUsed} setColorsUsed={setColorsUsed} colorsUsedNow={colorsUsedNow} colorsLeft={colorsLeft} setColorsLeft={setColorsLeft} colorsLeftNow={colorsLeftNow} dataSaved={dataSaved} setDataSaved={setDataSaved} />
+          <CreateBox title = 'P3' colorNum = 'color3' colorsUsed={colorsUsed} setColorsUsed={setColorsUsed} colorsUsedNow={colorsUsedNow} colorsLeft={colorsLeft} setColorsLeft={setColorsLeft} colorsLeftNow={colorsLeftNow} dataSaved={dataSaved} setDataSaved={setDataSaved} />
+          <CreateBox title = 'P4' colorNum = 'color4' colorsUsed={colorsUsed} setColorsUsed={setColorsUsed} colorsUsedNow={colorsUsedNow} colorsLeft={colorsLeft} setColorsLeft={setColorsLeft} colorsLeftNow={colorsLeftNow} dataSaved={dataSaved} setDataSaved={setDataSaved} />
         </Grid>
       </Container>
     </main>
