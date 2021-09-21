@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function NavBar({loadData}) {
+export default function NavBar() {
   const classes = useStyles();
   const { currentUser } = useAuth()
 
@@ -37,7 +37,7 @@ export default function NavBar({loadData}) {
           <Typography variant="h6" className={classes.title}>
           </Typography>
           {currentUser && <Button id="profile" display = "none" color="inherit" component={Link} to="/profile" >Profile</Button>}
-          <Modals loadData={loadData} />
+          <Modals />
         </Toolbar>
       </AppBar>
     </div>

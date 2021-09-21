@@ -2,7 +2,7 @@ import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 
-const CreateBox = ({title, colorNum, colorsUsed, setColorsUsed, colorsUsedNow, colorsLeft, setColorsLeft, colorsLeftNow, dataSaved, setDataSaved}) => {        
+const CreateBox = ({title, colorNum, colorsUsed, setColorsUsed, colorsLeft, setColorsLeft, dataSaved, setDataSaved}) => {        
     
     return (
       <Grid item xs={5}>
@@ -12,23 +12,22 @@ const CreateBox = ({title, colorNum, colorsUsed, setColorsUsed, colorsUsedNow, c
               <label>Choose Color: </label>
               <select onChange={(e)=>{
                 // remove new color from colorsLeftNow
+                let colorsLeftNow = colorsLeft
                 colorsLeftNow = colorsLeftNow.filter((color) => color!==e.target.value)
                 // if last color exists, add to colorsLeftNow
+                let colorsUsedNow = colorsUsed
                 if (colorsUsedNow[colorNum]) { colorsLeftNow = [colorsUsedNow[colorNum], ...colorsLeftNow] }
                 // adds newly selected color to colorUsed
+                
                 colorsUsedNow[colorNum] = e.target.value
                 // trying to fix concatenation
-                
-                // const empty = ['']
-                // colorsLeftNow = empty.concat(colorsLeftNow)
-                
                 setColorsUsed(colorsUsedNow)
                 setColorsLeft(colorsLeftNow)
                 setDataSaved(false)
               }}
-                value={colorsUsedNow[colorNum]}
+                value={colorsUsed[colorNum]}
                 >
-                <option value={colorsUsedNow[colorNum]} disabled hidden>{colorsUsedNow[colorNum]}</option>  
+                <option value={colorsUsed[colorNum]} disabled hidden>{colorsUsed[colorNum]}</option>  
                 {colorsLeft.map(color=>{
                     return <option key={color} value={color}>{color}</option>
                 })}

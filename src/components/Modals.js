@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Modals({loadData}) {
+export default function Modals() {
   const history = useHistory();
   const [error, setError] = useState("")
   const signUpEmailRef = useRef()
@@ -56,7 +56,7 @@ export default function Modals({loadData}) {
   const handleLogin = async(e) => {
     e.preventDefault()
     handleCloseLogin()
-    loadData()
+    // loadData()
     try {
       await login(loginEmailRef.current.value, loginPasswordRef.current.value)
     } catch {
