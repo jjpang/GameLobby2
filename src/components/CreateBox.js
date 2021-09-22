@@ -2,7 +2,7 @@ import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 
-const CreateBox = ({title, colorNum, colorsUsed, setColorsUsed, colorsLeft, setColorsLeft, dataSaved, setDataSaved}) => {        
+const CreateBox = ({title, colorNum, colorsUsed, setColorsUsed, colorsLeft, setColorsLeft, saveData}) => {        
     
     return (
       <Grid item xs={5}>
@@ -23,7 +23,7 @@ const CreateBox = ({title, colorNum, colorsUsed, setColorsUsed, colorsLeft, setC
                 // trying to fix concatenation
                 setColorsUsed(colorsUsedNow)
                 setColorsLeft(colorsLeftNow)
-                setDataSaved(false)
+                saveData()
               }}
                 value={colorsUsed[colorNum]}
                 >

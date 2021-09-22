@@ -54,20 +54,20 @@ export default function Modals() {
     }
   }
   const handleLogin = async(e) => {
-    e.preventDefault()
     handleCloseLogin()
     // loadData()
     try {
       await login(loginEmailRef.current.value, loginPasswordRef.current.value)
+      window.location.reload()
     } catch {
       setError("Failed to login")
     }
   }
   const handleLogout = async(e) => {
-    e.preventDefault()
     history.push("/")
     try {
       await logout()
+      window.location.reload()
     } catch {
       setError("Failed to logout")
     }
